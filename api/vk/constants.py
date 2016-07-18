@@ -1,0 +1,5 @@
+API_PREFIX = 'https://api.vk.com/method'
+API_VERSION = None
+ACCESS_TOKEN = None
+GROUP_MEMBERS_PER_REQUEST = 1000
+MAX_RETRIES = 3
