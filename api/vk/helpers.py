@@ -3,6 +3,9 @@ from urllib.parse import urlencode
 import requests
 from functools import lru_cache
 
+req_stats = dict()
+req_count = 0
+
 
 @lru_cache(maxsize=10)
 def get_session(max_retries):
@@ -17,6 +20,7 @@ def get_session(max_retries):
 
 def get(method_name, method_params, max_retries=vk_constants.MAX_RETRIES, **options):
     # prepare url
+    global req_count, req_stats
     url = '%s/%s' % (vk_constants.API_PREFIX, method_name)
 
     # prepare params
@@ -27,6 +31,15 @@ def get(method_name, method_params, max_retries=vk_constants.MAX_RETRIES, **opti
 
     # prepare session
     s = get_session(max_retries)
+
+    # requests counter
+    req_count += 1
+    if method_name in req_stats:
+        req_stats[method_name] += 1
+    else:
+        req_stats[method_name] = 1  # new method, let's create key in dict
+    if req_count % 100 == 0:
+        print(req_stats, req_count)
 
     # GET request
     r = s.get(url, params=method_params)
