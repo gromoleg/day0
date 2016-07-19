@@ -131,9 +131,10 @@ class VKUser(User):
         ids = response['items']
         return VKUsers(ids).get_user_objs()
 
+    @cached_method(max_size=1)
     def get_groups(self, **options):
         method_name = 'users.getSubscriptions'
-        method_params = {'user_id': self.id, 'v': '5.52'}
+        method_params = {'user_id': str(self.id), 'v': '5.52'}
         # don't use offset, count or extended, otherwise you'll have to rewrite parser
 
         response = vk_helpers.get(method_name=method_name, method_params=method_params, **options)
@@ -142,3 +143,7 @@ class VKUser(User):
 
         ids = response['groups']['items']
         return ids
+
+    @cached_method(max_size=1)
+    def count_groups(self, **options):
+        return len(self.get_groups())
