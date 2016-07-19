@@ -2,6 +2,7 @@ from helpers.pclass import Users, User
 from helpers.decorators import cached_method
 from . import constants as vk_constants
 from . import helpers as vk_helpers
+import constants
 
 
 def chunks(l, n):
@@ -77,9 +78,13 @@ class VKUser(User):
             current_count = len(result)
         return result
 
-    def get_wall(self, count=vk_constants.POSTS_PER_REQUEST, offset=0, extended=True, **options):
+    def get_wall(self, count=vk_constants.POSTS_PER_REQUEST, offset=0, limit=constants.MAX_USER_POSTS, extended=True,
+                 **options):
         method_name = 'wall.get'
         method_params = {'owner_id': self.id, 'offset': offset, 'count': count, 'extended': int(extended), 'v': '5.52'}
+
+        if limit is not None:
+            assert count <= limit
 
         result = []
         if extended:
@@ -96,7 +101,7 @@ class VKUser(User):
         if extended:
             profiles.extend(response['profiles'])
             groups.extend(response['groups'])
-        while current_count < posts_count - offset:
+        while current_count < posts_count - offset and (not limit or (current_count + count <= limit - offset)):
             method_params['offset'] = current_count
             response = vk_helpers.get(method_name=method_name, method_params=method_params, **options)
             if response is None:
