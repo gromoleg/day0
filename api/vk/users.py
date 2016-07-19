@@ -35,6 +35,9 @@ class VKUsers(Users):
             result.extend(response)
         return [VKUser(user['uid'], user, cache_enabled=self.cache_enabled) for user in result]
 
+    def get_user_objs(self):
+        return [VKUser(uid) for uid in self.ids]
+
 
 class VKUser(User):
     def __init__(self, id, udata=None, cache_enabled=True):
@@ -126,7 +129,7 @@ class VKUser(User):
             return None
 
         ids = response['items']
-        return VKUsers(ids).get_information()
+        return VKUsers(ids).get_user_objs()
 
     def get_groups(self, **options):
         method_name = 'users.getSubscriptions'
