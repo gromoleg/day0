@@ -38,3 +38,9 @@ class VKGroup(Group):
             result.extend(response['users'])
             current_count = len(result)
         return users.VKUsers(result)
+
+    @cached_method(max_size=1)
+    def __len__(self):
+        method_name = 'groups.getMembers'
+        method_params = {'group_id': self.id, 'offset': 0}
+        return vk_helpers.get(method_name=method_name, method_params=method_params)['count']

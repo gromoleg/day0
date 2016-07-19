@@ -14,6 +14,14 @@ class Group(metaclass=abc.ABCMeta):
         """
         pass
 
+    @abc.abstractclassmethod
+    def __len__(self):
+        """
+
+        :rtype: int
+        """
+        pass
+
 
 class Users(metaclass=abc.ABCMeta):
     __slots__ = ["ids"]
