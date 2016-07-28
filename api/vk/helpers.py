@@ -2,9 +2,15 @@ from . import constants as vk_constants
 from urllib.parse import urlencode
 import requests
 from functools import lru_cache
+from helpers import exceptions as e
 
 req_stats = dict()
 req_count = 0
+error_codes = {1: e.UnknownError, 2: e.AppDisabledError, 3: e.UnknownMethodError, 4: e.AuthError,
+               5: e.AuthError, 6: e.TooManyRequestsError, 7: e.AccessDeniedError, 8: e.BadRequestError,
+               9: e.TooManyRequestsError, 10: e.ServerError, 15: e.AccessDeniedError, 100: e.BadRequestError,
+               101: e.BadRequestError, 113: e.BadRequestError, 150: e.BadRequestError, 200: e.AccessDeniedError,
+               201: e.AccessDeniedError, 203: e.AccessDeniedError, 600: e.AccessDeniedError}
 
 
 @lru_cache(maxsize=10)
@@ -45,6 +51,14 @@ def get(method_name, method_params, max_retries=vk_constants.MAX_RETRIES, **opti
     r = s.get(url, params=method_params)
 
     if r.status_code != 200:
+        print('request_error:', r.status_code)
         return None
-    response = r.json().get('response', None)
+    r = r.json()
+    response = r.get('response', None)
+    if response is None:
+        error_code = r.get('error', dict()).get('error_code', None)
+        if error_code in error_codes:
+            raise error_codes[error_code]
+        else:
+            print('rfuck', r.json())
     return response
