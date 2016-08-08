@@ -3,7 +3,8 @@ from os import getenv
 API_PREFIX = 'https://api.vk.com/method'
 API_VERSION = None
 ACCESS_TOKEN = getenv('VK_ACCESS_TOKEN', None)
-MAX_RETRIES = 3
+MAX_HTTP_RETRIES = 3
+
 
 AUDIO_PER_REQUEST = 6000  # max value
 GROUP_MEMBERS_PER_REQUEST = 1000  # max value

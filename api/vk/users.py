@@ -1,7 +1,7 @@
 from helpers.pclass import Users, User
 from helpers.decorators import cached_method
 from . import constants as vk_constants
-from . import helpers as vk_helpers
+from .decorators import vk_get
 import constants
 
 
@@ -18,6 +18,9 @@ class VKUsers(Users):
     def __len__(self):
         return len(self.ids)
 
+    def __hash__(self):
+        return self.ids
+
     @cached_method(max_size=10)
     def get_information(self, count=vk_constants.USERS_PER_REQUEST, fields=vk_constants.DEFAULT_USER_FIELDS,
                         **options):
@@ -29,7 +32,7 @@ class VKUsers(Users):
         # retrieve users
         for temp_ids in chunks(self.ids, count):
             method_params['user_ids'] = ','.join(str(uid) for uid in temp_ids)
-            response = vk_helpers.get(method_name=method_name, method_params=method_params, **options)
+            response = vk_get(default_value=None, method_name=method_name, method_params=method_params, **options)
             if response is None:
                 return None
             result.extend(response)
@@ -45,12 +48,21 @@ class VKUser(User):
         self.udata = udata
         self.cache_enabled = cache_enabled
 
+    def __hash__(self):
+        return self.id
+
+    def __eq__(self, other):
+        return self.id == other.id
+
+    def __ne__(self, other):
+        return self.id != other.id
+
     @cached_method(max_size=1)
     def get_information(self, fields=vk_constants.DEFAULT_USER_FIELDS, **options):
         method_name = 'users.get'
         method_params = {'user_ids': str(self.id), 'fields': ','.join(fields)}
 
-        response = vk_helpers.get(method_name=method_name, method_params=method_params, **options)
+        response = vk_get(default_value=list(dict()), method_name=method_name, method_params=method_params, **options)
         if response is None:
             return None
         self.udata = response[0]
@@ -61,11 +73,12 @@ class VKUser(User):
         # requires access_token and audio permission
         method_name = 'audio.get'
         method_params = {'owner_id': self.id, 'offset': offset, 'count': count, 'v': '5.52'}  # freeze version
+        default_value = {'count': 0, 'items': []}
 
         result = []
 
         # retrieve audio.count and first n songs
-        response = vk_helpers.get(method_name=method_name, method_params=method_params, **options)
+        response = vk_get(default_value=default_value, method_name=method_name, method_params=method_params, **options)
         if response is None:
             return None
         songs_count = response['count']
@@ -73,7 +86,8 @@ class VKUser(User):
         current_count = len(result)
         while current_count < songs_count - offset:
             method_params['offset'] = current_count
-            response = vk_helpers.get(method_name=method_name, method_params=method_params, **options)
+            response = vk_get(default_value=default_value,
+                              method_name=method_name, method_params=method_params, **options)
             if response is None:
                 return None
             songs_count = response['count']
@@ -85,6 +99,7 @@ class VKUser(User):
                  **options):
         method_name = 'wall.get'
         method_params = {'owner_id': self.id, 'offset': offset, 'count': count, 'extended': int(extended), 'v': '5.52'}
+        default_value = {'count': 0, 'items': [], 'profiles': [], 'groups': []}
 
         if limit is not None:
             assert count <= limit
@@ -95,7 +110,7 @@ class VKUser(User):
             groups = []
 
         # retrieve posts.count and first n posts
-        response = vk_helpers.get(method_name=method_name, method_params=method_params, **options)
+        response = vk_get(default_value=default_value, method_name=method_name, method_params=method_params, **options)
         if response is None:
             return None
         posts_count = response['count']
@@ -106,7 +121,8 @@ class VKUser(User):
             groups.extend(response['groups'])
         while current_count < posts_count - offset and (not limit or (current_count + count <= limit - offset)):
             method_params['offset'] = current_count
-            response = vk_helpers.get(method_name=method_name, method_params=method_params, **options)
+            response = vk_get(default_value=default_value,
+                              method_name=method_name, method_params=method_params, **options)
             if response is None:
                 return None
             posts_count = response['count']
@@ -124,7 +140,7 @@ class VKUser(User):
         method_params = {'user_id': self.id, 'offset': offset, 'v': '5.52'}  # no count, just return all ids
         # don't use fields, otherwise you'll get problems when len(friends)>5k
 
-        response = vk_helpers.get(method_name=method_name, method_params=method_params, **options)
+        response = vk_get(default_value={'items': []}, method_name=method_name, method_params=method_params, **options)
         if response is None:
             return None
 
@@ -137,7 +153,8 @@ class VKUser(User):
         method_params = {'user_id': str(self.id), 'v': '5.52'}
         # don't use offset, count or extended, otherwise you'll have to rewrite parser
 
-        response = vk_helpers.get(method_name=method_name, method_params=method_params, **options)
+        response = vk_get(default_value={'groups': {'items': []}}, method_name=method_name, method_params=method_params,
+                          **options)
         if response is None:
             return None
 

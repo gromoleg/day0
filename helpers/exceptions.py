@@ -26,6 +26,14 @@ class BadRequestError(Exception):
         super(BadRequestError, self).__init__(BadRequestError.message)
 
 
+class CaptchaError(Exception):
+    message = "Captcha needed"
+
+    def __init__(self):
+        super(CaptchaError, self).__init__(CaptchaError.message)
+
+
+
 class ServerError(Exception):
     message = "Server error"
 
