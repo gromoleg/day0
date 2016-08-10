@@ -4,6 +4,9 @@ import constants
 from . import constants as vk_constants
 from . import helpers as vk_helpers
 from . import users
+import logging
+
+logger = logging.getLogger("api")
 
 
 class VKGroup(Group):
@@ -18,6 +21,7 @@ class VKGroup(Group):
         method_params = {'group_id': self.id, 'offset': offset, 'count': count}
 
         if limit is not None:
+            logger.critical("VKGroup.getMembers: count > limit (%s > %s)" % (count, limit))
             assert count <= limit
 
         result = []
@@ -25,6 +29,7 @@ class VKGroup(Group):
         # retrieve group.members.count and first n members
         response = vk_helpers.get(method_name=method_name, method_params=method_params, **options)
         if response is None:
+            logger.warning("VKGroup.getMembers: response is None")
             return None
         members_count = response['count']
         result.extend(response['users'])
@@ -33,6 +38,7 @@ class VKGroup(Group):
             method_params['offset'] = current_count
             response = vk_helpers.get(method_name=method_name, method_params=method_params, **options)
             if response is None:
+                logger.warning("VKGroup.getMembers: response is None")
                 return None
             members_count = response['count']
             result.extend(response['users'])

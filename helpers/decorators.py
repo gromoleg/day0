@@ -2,6 +2,9 @@
 from collections import deque
 from time import sleep
 import constants
+import logging
+
+logger = logging.getLogger("api")
 
 
 def cached_method(max_size=constants.MAX_CACHE_SIZE):
@@ -68,30 +71,34 @@ def req_exc_retry(function, exceptions=None, instant_return_exceptions=None, spe
         special_exceptions = dict()
 
     def sleep_for(seconds):
-        print("Waiting", seconds, "seconds...")
+        logger.info("retry_request: waiting %s seconds..." % seconds)
         sleep(seconds)
 
     def retry_func(iterations=retry, time=start_time, first_time=True, max_time=max_time,
                    time_func=time_func, default_value=default_value, old_cl=None,
                    *args, **kwargs):
-        if (iterations is not None and iterations <= 0) or time > max_time:
-            print("Exception_end_by_if:", iterations, time, max_time)
+        if iterations is not None and iterations <= 0:
+            logger.info("retry_request: stopped by iterations number")
+            return None
+        if time > max_time:
+            logger.info("retry_request: stopped by max_time, time: %s max_time: %s" % (time, max_time))
             return None
         try:
             return function(*args, **kwargs)
         except Exception as e:
+            # raise e
             cl = e.__class__
             if cl in instant_return_exceptions:
-                print("Got instant_return_exception:", cl)
+                logger.info("retry_request: got instant_return_exception: %s %s" % (cl, getattr(e, "error_info", "")))
                 return default_value
             elif cl in exceptions:
-                print("Got exception:", cl)
+                logger.info("retry_request: got exception: %s %s" % (cl, getattr(e, "error_info", "")))
                 if iterations:
                     iterations -= 1
                 sleep_for(time)
                 return retry_func(iterations, time_func(time), first_time=False, *args, **kwargs)
             elif cl in special_exceptions:  # apply special_exception params
-                print("Got special_exception:", cl)
+                logger.info("retry_request: got special_exception: %s %s" % (cl, getattr(e, "error_info", "")))
                 if first_time and cl != old_cl:
                     temp = special_exceptions[cl]
                     time_func = temp.get('time_func', time_func)
@@ -115,6 +122,7 @@ def req_exc_retry(function, exceptions=None, instant_return_exceptions=None, spe
                     return retry_func(iterations, time_func(time), first_time, max_time, time_func, default_value,
                                       old_cl, *args, **kwargs)
             else:
+                logger.warning("retry_request: got unknown exception %s" % e)
                 raise e
 
     return retry_func

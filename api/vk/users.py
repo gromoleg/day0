@@ -3,6 +3,9 @@ from helpers.decorators import cached_method
 from . import constants as vk_constants
 from .decorators import vk_get
 import constants
+import logging
+
+logger = logging.getLogger("api")
 
 
 def chunks(l, n):
@@ -34,6 +37,7 @@ class VKUsers(Users):
             method_params['user_ids'] = ','.join(str(uid) for uid in temp_ids)
             response = vk_get(default_value=None, method_name=method_name, method_params=method_params, **options)
             if response is None:
+                logger.warning("VKUsers.get: response is None")
                 return None
             result.extend(response)
         return [VKUser(user['uid'], user, cache_enabled=self.cache_enabled) for user in result]
@@ -64,6 +68,7 @@ class VKUser(User):
 
         response = vk_get(default_value=list(dict()), method_name=method_name, method_params=method_params, **options)
         if response is None:
+            logger.warning("VKUser.get_information: response is None")
             return None
         self.udata = response[0]
         return response[0]
@@ -80,6 +85,7 @@ class VKUser(User):
         # retrieve audio.count and first n songs
         response = vk_get(default_value=default_value, method_name=method_name, method_params=method_params, **options)
         if response is None:
+            logger.warning("VKUser.get_audio: response is None")
             return None
         songs_count = response['count']
         result.extend(response['items'])
@@ -89,6 +95,7 @@ class VKUser(User):
             response = vk_get(default_value=default_value,
                               method_name=method_name, method_params=method_params, **options)
             if response is None:
+                logger.warning("VKUser.get_audio: response is None")
                 return None
             songs_count = response['count']
             result.extend(response['items'])
@@ -102,6 +109,7 @@ class VKUser(User):
         default_value = {'count': 0, 'items': [], 'profiles': [], 'groups': []}
 
         if limit is not None:
+            logger.warning("VKUser.get_wall: count > limit (%s > %s)" % (count, limit))
             assert count <= limit
 
         result = []
@@ -112,6 +120,7 @@ class VKUser(User):
         # retrieve posts.count and first n posts
         response = vk_get(default_value=default_value, method_name=method_name, method_params=method_params, **options)
         if response is None:
+            logger.warning("VKUser.get_wall: response is None")
             return None
         posts_count = response['count']
         result.extend(response['items'])
@@ -124,6 +133,7 @@ class VKUser(User):
             response = vk_get(default_value=default_value,
                               method_name=method_name, method_params=method_params, **options)
             if response is None:
+                logger.warning("VKUser.get_wall: response is None")
                 return None
             posts_count = response['count']
             result.extend(response['items'])
@@ -142,6 +152,7 @@ class VKUser(User):
 
         response = vk_get(default_value={'items': []}, method_name=method_name, method_params=method_params, **options)
         if response is None:
+            logger.warning("VKUser.get_friends: response is None")
             return None
 
         ids = response['items']
@@ -156,6 +167,7 @@ class VKUser(User):
         response = vk_get(default_value={'groups': {'items': []}}, method_name=method_name, method_params=method_params,
                           **options)
         if response is None:
+            logger.warning("VKUser.get_groups: response is None")
             return None
 
         ids = response['groups']['items']

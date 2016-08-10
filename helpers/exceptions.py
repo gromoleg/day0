@@ -1,69 +1,77 @@
-class AccessDeniedError(Exception):
+class ApiException(Exception):
+    message = ""
+
+    def __init__(self, error_info):
+        self.error_info = error_info or ""
+        self.message = self.__class__.message + " : " + str(self.error_info)
+        super(ApiException, self).__init__(self.message)
+
+
+class AccessDeniedError(ApiException):
     message = "Access denied"
 
-    def __init__(self):
-        super(AccessDeniedError, self).__init__(AccessDeniedError.message)
+    def __init__(self, error_info):
+        super(AccessDeniedError, self).__init__(error_info)
 
 
-class AppDisabledError(Exception):
+class AppDisabledError(ApiException):
     message = "Application disabled"
 
-    def __init__(self):
-        super(AppDisabledError, self).__init__(AppDisabledError.message)
+    def __init__(self, error_info):
+        super(AppDisabledError, self).__init__(error_info)
 
 
-class AuthError(Exception):
+class AuthError(ApiException):
     message = "Auth error"
 
-    def __init__(self):
-        super(AuthError, self).__init__(AuthError.message)
+    def __init__(self, error_info):
+        super(AuthError, self).__init__(error_info)
 
 
-class BadRequestError(Exception):
+class BadRequestError(ApiException):
     message = "Bad request"
 
-    def __init__(self):
-        super(BadRequestError, self).__init__(BadRequestError.message)
+    def __init__(self, error_info):
+        super(BadRequestError, self).__init__(error_info)
 
 
-class CaptchaError(Exception):
+class CaptchaError(ApiException):
     message = "Captcha needed"
 
-    def __init__(self):
-        super(CaptchaError, self).__init__(CaptchaError.message)
+    def __init__(self, error_info):
+        super(CaptchaError, self).__init__(error_info)
 
 
-
-class ServerError(Exception):
+class ServerError(ApiException):
     message = "Server error"
 
-    def __init__(self):
-        super(ServerError, self).__init__(ServerError.message)
+    def __init__(self, error_info):
+        super(ServerError, self).__init__(error_info)
 
 
-class TooManyRequestsError(Exception):
+class TooManyRequestsError(ApiException):
     message = "Too many requests per second"
 
-    def __init__(self):
-        super(TooManyRequestsError, self).__init__(TooManyRequestsError.message)
+    def __init__(self, error_info):
+        super(TooManyRequestsError, self).__init__(error_info)
 
 
-class UnknownError(Exception):
+class UnknownError(ApiException):
     message = "Unknown error"
 
-    def __init__(self):
-        super(UnknownError, self).__init__(UnknownError.message)
+    def __init__(self, error_info):
+        super(UnknownError, self).__init__(error_info)
 
 
-class UnknownMethodError(Exception):
+class UnknownMethodError(ApiException):
     message = "Unknown method"
 
-    def __init__(self):
-        super(UnknownMethodError, self).__init__(UnknownMethodError.message)
+    def __init__(self, error_info):
+        super(UnknownMethodError, self).__init__(error_info)
 
 
-class UserDeactivatedError(Exception):
+class UserDeactivatedError(ApiException):
     message = "User deactivated"
 
-    def __init__(self):
-        super(UserDeactivatedError, self).__init__(UserDeactivatedError.message)
+    def __init__(self, error_info):
+        super(UserDeactivatedError, self).__init__(error_info)
