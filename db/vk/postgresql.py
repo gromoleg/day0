@@ -27,6 +27,11 @@ class PostgreSQL_DB(Database):
         db = db or getenv('VK_POSTGRESQL_DB')
         user = user or getenv('VK_POSTGRESQL_USER')
         password = password or getenv('VK_POSTGRESQL_PASSWORD')
+
+        assert db is not None, ValueError("db name is not defined")
+        assert user is not None, ValueError("db user is not defined")
+        assert password is not None, ValueError("db password is not defined")
+
         url = 'postgresql://{}:{}@{}:{}/{}'
         url = url.format(user, password, host, port, db)
 
