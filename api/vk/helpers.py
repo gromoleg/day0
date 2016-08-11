@@ -4,6 +4,7 @@ import requests
 from functools import lru_cache
 from helpers import exceptions as e
 import logging
+import copy
 
 logger = logging.getLogger("api")
 
@@ -34,15 +35,16 @@ def get(method_name, method_params, max_retries=vk_constants.MAX_HTTP_RETRIES, *
     global req_count, req_stats
     url = '%s/%s' % (vk_constants.API_PREFIX, method_name)
 
+    # prepare session
+    s = get_session(max_retries)
+
     # prepare params
+    method_params = copy.deepcopy(method_params)
     method_params.update(options)
     logger.info("vk_api.get, url: %s, params: %s" % (url, method_params))
     method_params['access_token'] = method_params.get('access_token', vk_constants.ACCESS_TOKEN) or ''
     method_params['v'] = method_params.get('v', vk_constants.API_VERSION) or ''
     method_params = urlencode(method_params)
-
-    # prepare session
-    s = get_session(max_retries)
 
     # requests counter
     req_count += 1
