@@ -57,3 +57,21 @@ class User(metaclass=abc.ABCMeta):
     @abc.abstractclassmethod
     def get_groups(self, **options):
         pass
+
+
+class Database(metaclass=abc.ABCMeta):
+    @abc.abstractstaticmethod
+    def connect(db, user, password, host, port):
+        pass
+
+    @abc.abstractproperty
+    def tables(self):
+        pass
+
+    @abc.abstractclassmethod
+    def create_tables(self):
+        pass
+
+    @abc.abstractclassmethod
+    def insert_group_members(self, members):
+        pass

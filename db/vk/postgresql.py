@@ -1,14 +1,17 @@
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import ARRAY
+from helpers.pclass import Database
 from os import getenv
 import logging
 
 logger = logging.getLogger('db')
-logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
-logging.getLogger('sqlalchemy.engine').handlers = logging.getLogger("db").handlers
+sa_logger = logging.getLogger('sqlalchemy')
+sa_logger.setLevel(logging.INFO)
+sa_logger.handlers = logging.getLogger("db").handlers
+sa_logger.propagate = 0
 
 
-class PostgreSQL_DB(object):
+class PostgreSQL_DB(Database):
     def __init__(self, conn, meta):
         """
 
@@ -19,8 +22,10 @@ class PostgreSQL_DB(object):
         self.meta = meta
 
     @staticmethod
-    def connect(db, user, password=None, host='localhost', port=5432):
+    def connect(db=None, user=None, password=None, host='localhost', port=5432):
         """Returns a connection and a metadata object"""
+        db = db or getenv('VK_POSTGRESQL_DB')
+        user = user or getenv('VK_POSTGRESQL_USER')
         password = password or getenv('VK_POSTGRESQL_PASSWORD')
         url = 'postgresql://{}:{}@{}:{}/{}'
         url = url.format(user, password, host, port, db)
