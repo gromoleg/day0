@@ -10,3 +10,8 @@ MAX_API_RETRY_TIME = 300  # seconds
 
 def api_retry_time_function(prev_time):
     return int(prev_time * 2.5)
+
+
+DEFAULT_UPDATE_FREQUENCY = 15  # minutes
+DEFAULT_GROUP_ID = "100567023"
+DEFAULT_DB_ENGINE = "postgresql"
