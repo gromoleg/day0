@@ -18,15 +18,11 @@ def main():
         engine.create_tables()
         return
     group = vk.group(args.group)
-    seconds = int(args.time * 60)
-    while True:
-        logging.info('main: retrieve group members')
-        members = group.get_members().ids
-        logging.info('main: got %s members' % len(members))
-        logging.info('main: write members to db')
-        engine.insert_group_members(members)
-        logging.info('main: waiting %s seconds...' % seconds)
-        sleep(seconds)
+    logging.info('main: retrieve group members')
+    members = group.get_members().ids
+    logging.info('main: got %s members' % len(members))
+    logging.info('main: write members to db')
+    engine.insert_group_members(members)
 
 
 if __name__ == '__main__':
